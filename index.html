@@ -1,2 +1,59 @@
 <!--Anthonny Cristhyan Silva Patrocinio !-->
 <!--Software Engineer student at ULBRA, 4th semester, learning front-end development.!-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas Acadêmicas - Anthonny Cristhyan</title>
+</head>
+<body>
+
+    <header>
+        <h1>Gerenciador de Tarefas Acadêmicas</h1>
+    </header>
+
+    <main>
+        <section aria-labelledby="filtros-titulo">
+            <h2 id="filtros-titulo">Busca e Filtros</h2>
+            <form action="#" method="GET">      
+                <p>
+                    <label for="busca-titulo">Buscar por título da tarefa:</label>
+                    <input type="text" id="busca-titulo" name="busca">
+                </p>
+
+                <p>
+                    <label for="filtro-status">Filtrar por Status:</label>
+                    <select id="filtro-status" name="status">
+                        <option value="todos">Todos os status</option>
+                        <option value="a-fazer">A fazer</option>
+                        <option value="em-andamento">Em andamento</option>
+                        <option value="em-revisao">Em revisão</option>
+                        <option value="concluida">Concluída</option>
+                    </select>
+                </p>
+
+                <fieldset>
+                    <legend>Filtrar por Prioridade</legend>
+                    
+                    <input type="radio" id="prioridade-todas" name="prioridade" value="todas" checked>
+                    <label for="prioridade-todas">Todas</label>
+                    
+                    <input type="radio" id="prioridade-baixa" name="prioridade" value="baixa">
+                    <label for="prioridade-baixa">Baixa</label>
+                    
+                    <input type="radio" id="prioridade-media" name="prioridade" value="media">
+                    <label for="prioridade-media">Média</label>
+                    
+                    <input type="radio" id="prioridade-alta" name="prioridade" value="alta">
+                    <label for="prioridade-alta">Alta</label>
+                </fieldset>
+
+                <p>
+                    <button type="submit">Aplicar Filtros</button>
+                </p>
+            </form>
+        </section>
+
+</body>
+</html>
