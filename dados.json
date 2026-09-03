@@ -1,0 +1,76 @@
+{
+  "tarefas": [
+    {
+      "id": "t1",
+      "titulo": "Modelar Banco de Dados Relacional (SQL) com uma documentação gigantesca que não cabe na tela",
+      "projeto": "Sistema de Tickets",
+      "responsavel": "Anthonny Cristhyan",
+      "status": "a-fazer",
+      "prioridade": "alta",
+      "prazo": "2026-08-25"
+    },
+    {
+      "id": "t2",
+      "titulo": "Gravar vídeo de apresentação para cliente",
+      "projeto": "Agência ACK (IA em Anúncios)",
+      "responsavel": "Kívia",
+      "status": "a-fazer",
+      "prioridade": "media",
+      "prazo": "2026-08-30"
+    },
+    {
+      "id": "t3",
+      "titulo": "Estruturar rotas do Backend (CRUD)",
+      "projeto": "Sistema de Tickets",
+      "responsavel": "Anthonny Cristhyan",
+      "status": "em-andamento",
+      "prioridade": "alta",
+      "prazo": "2026-08-22"
+    },
+    {
+      "id": "t4",
+      "titulo": "Escrever roteiro do plano de negócios",
+      "projeto": "Agência ACK (IA em Anúncios)",
+      "responsavel": "Kívia",
+      "status": "em-andamento",
+      "prioridade": "baixa",
+      "prazo": "2026-08-28"
+    },
+    {
+      "id": "t5",
+      "titulo": "Revisar critérios de aceite da E3",
+      "projeto": "Sistema de Tickets",
+      "responsavel": "Anthonny Cristhyan",
+      "status": "em-revisao",
+      "prioridade": "alta",
+      "prazo": "2026-09-05"
+    },
+    {
+      "id": "t6",
+      "titulo": "Testar responsividade do quadro em telas menores",
+      "projeto": "Agência ACK (IA em Anúncios)",
+      "responsavel": "Kívia",
+      "status": "em-revisao",
+      "prioridade": "media",
+      "prazo": "2026-09-03"
+    },
+    {
+      "id": "t7",
+      "titulo": "Criar calculadora de 4 bits no Logisim",
+      "projeto": "Arquitetura de Computadores",
+      "responsavel": "Anthonny Cristhyan",
+      "status": "concluida",
+      "prioridade": "alta",
+      "prazo": "2026-08-15"
+    },
+    {
+      "id": "t8",
+      "titulo": "Configurar servidor HTTP local para as próximas entregas",
+      "projeto": "Desenvolvimento Frontend",
+      "responsavel": "Anthonny Cristhyan",
+      "status": "concluida",
+      "prioridade": "media",
+      "prazo": "2026-08-20"
+    }
+  ]
+}

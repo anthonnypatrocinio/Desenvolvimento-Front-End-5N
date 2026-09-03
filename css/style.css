@@ -1,0 +1,422 @@
+/* ==========================================================================
+   TEMA: Mural de cortiça
+   -------------------------------------------------------------------------
+   Cada tarefa é uma ficha de papel presa por um pino colorido; cada coluna
+   é uma zona do quadro. Referência: o mural físico de quem estuda —
+   cortiça, papel, fita crepe, percevejo — e não um dashboard de SaaS.
+
+   Paleta:
+     --cortica / --cortica-escura   cortiça (fundo do quadro)
+     --papel / --papel-sombra       fichas de tarefa
+     --tinta                        texto principal, tom de tinta marrom
+     --status-fazer/andamento/revisao/concluido   cor do percevejo por status
+
+   Tipografia:
+     Títulos (h1/h2/h3/.titulo-cartao) → fonte "escrita à mão" (rótulo de quadro)
+     Corpo/dados → fonte de sistema, para leitura confortável dos detalhes
+
+   Nenhuma classe, id ou atributo usado pelo JavaScript foi renomeado:
+   .cartao-tarefa, .status-fazer/andamento/revisao/concluido, .titulo-cartao,
+   .texto-padrao, .texto-pequeno, .quadro-projetos, .coluna-status,
+   .lista-tarefas, .titulo-principal, [data-quadro], [data-lista-status],
+   [data-estado] continuam exatamente como o JS espera.
+   ========================================================================== */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Cortiça */
+    --cortica: #c69a5f;
+    --cortica-escura: #a97d45;
+    --cortica-linha: rgba(70, 45, 15, 0.18);
+
+    /* Papel das fichas */
+    --papel: #fdf6e6;
+    --papel-sombra: rgba(60, 38, 12, 0.28);
+    --tinta: #3a2a18;
+    --tinta-suave: #6b5842;
+
+    /* Pinos por status — mesma função de --status-*, nomes mantidos */
+    --status-fazer: #d64541;
+    --status-andamento: #e2a13a;
+    --status-revisao: #2f7fb0;
+    --status-concluido: #4c8c4a;
+
+    --cor-superficie: var(--papel);
+    --cor-texto: var(--tinta);
+    --cor-fundo-pagina: var(--cortica);
+
+    --espaco-sm: 0.5rem;
+    --espaco-md: 1rem;
+    --espaco-lg: 1.5rem;
+    --raio-borda: 3px;
+
+    --fonte-rotulo: "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+    --fonte-corpo: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+@keyframes ficha-fixada {
+    from {
+        opacity: 0;
+        transform: translateY(-14px) rotate(0deg) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotate(var(--rotacao, 0deg)) scale(1);
+    }
+}
+
+@keyframes pino-pulso {
+    0%, 100% { box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4); }
+    50% { box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.15); }
+}
+
+body {
+    background-color: var(--cortica);
+    background-image:
+        radial-gradient(circle at 15% 20%, var(--cortica-linha) 0, transparent 45%),
+        radial-gradient(circle at 80% 10%, var(--cortica-linha) 0, transparent 40%),
+        radial-gradient(circle at 60% 80%, var(--cortica-linha) 0, transparent 45%),
+        radial-gradient(circle at 30% 65%, var(--cortica-linha) 0, transparent 40%),
+        repeating-linear-gradient(45deg, var(--cortica-escura) 0 2px, transparent 2px 34px),
+        repeating-linear-gradient(-45deg, var(--cortica-escura) 0 1px, transparent 1px 41px);
+    background-blend-mode: multiply, multiply, multiply, multiply, overlay, overlay;
+    color: var(--tinta);
+    font-family: var(--fonte-corpo);
+    margin: 0;
+    padding: var(--espaco-lg);
+}
+
+*:focus-visible {
+    outline: 3px solid var(--tinta);
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+input[type="radio"], select, button, input[type="text"] {
+    min-height: 24px;
+    min-width: 24px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: var(--espaco-lg);
+}
+
+.titulo-principal {
+    font-family: var(--fonte-rotulo);
+    font-weight: 700;
+    font-size: clamp(1.7rem, 3vw + 1rem, 2.75rem);
+    margin: 0 0 var(--espaco-lg) 0;
+    color: #fffaf0;
+    text-shadow: 0 2px 0 rgba(58, 42, 24, 0.55), 0 4px 10px rgba(0, 0, 0, 0.25);
+    letter-spacing: 0.02em;
+    transform: rotate(-1deg);
+}
+
+/* --- Formulário de busca e filtros: ficha maior grudada com fita --- */
+main > section[aria-labelledby="filtros-titulo"] {
+    background: var(--papel);
+    background-image: linear-gradient(var(--cortica-linha) 1px, transparent 1px);
+    background-size: 100% 1.8rem;
+    border-radius: 2px;
+    padding: var(--espaco-lg);
+    margin-bottom: var(--espaco-lg);
+    box-shadow: 0 10px 20px var(--papel-sombra), 0 2px 0 rgba(255, 255, 255, 0.4) inset;
+    position: relative;
+    transform: rotate(0.4deg);
+}
+
+main > section[aria-labelledby="filtros-titulo"]::before {
+    content: "";
+    position: absolute;
+    top: -0.6rem;
+    left: 2rem;
+    width: 4.5rem;
+    height: 1.4rem;
+    background: rgba(226, 161, 58, 0.55);
+    border: 1px solid rgba(226, 161, 58, 0.75);
+    transform: rotate(-3deg);
+}
+
+#filtros-titulo {
+    font-family: var(--fonte-rotulo);
+    color: var(--tinta);
+    margin-top: 0;
+}
+
+main > section[aria-labelledby="filtros-titulo"] label {
+    font-weight: 600;
+    color: var(--tinta-suave);
+}
+
+main > section[aria-labelledby="filtros-titulo"] input[type="text"],
+main > section[aria-labelledby="filtros-titulo"] select {
+    font-family: var(--fonte-corpo);
+    background: #fffdf7;
+    border: 1px solid #d8c6a0;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+}
+
+fieldset {
+    border: 1px dashed #c9b183;
+    border-radius: 4px;
+}
+
+legend {
+    font-weight: 600;
+    color: var(--tinta-suave);
+    padding: 0 0.4rem;
+}
+
+main > section[aria-labelledby="filtros-titulo"] button[type="submit"] {
+    font-family: var(--fonte-rotulo);
+    font-size: 1rem;
+    background: var(--status-andamento);
+    color: #3a2a10;
+    border: none;
+    border-radius: 999px;
+    padding: 0.5rem 1.4rem;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #a97318;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+main > section[aria-labelledby="filtros-titulo"] button[type="submit"]:hover {
+    transform: translateY(-1px);
+}
+
+main > section[aria-labelledby="filtros-titulo"] button[type="submit"]:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #a97318;
+}
+
+/* --- Região de status: um pequeno cartaz pregado no topo do quadro --- */
+[data-estado] {
+    font-family: var(--fonte-corpo);
+    font-size: 0.95rem;
+    min-height: 1.4em;
+    color: #fffaf0;
+    background: rgba(58, 42, 24, 0.75);
+    border-left: 4px solid var(--status-andamento);
+    border-radius: 3px;
+    padding: 0.55rem 0.9rem;
+    margin: 0 0 var(--espaco-lg) 0;
+}
+
+/* --- O quadro em si --- */
+.quadro-projetos {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--espaco-lg);
+    position: relative;
+}
+
+#quadro-titulo {
+    font-family: var(--fonte-rotulo);
+    font-size: clamp(1.3rem, 2vw + 1rem, 1.9rem);
+    color: #fffaf0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0 0 var(--espaco-sm) 0;
+    transform: rotate(-0.6deg);
+}
+
+.coluna-status {
+    min-width: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px dashed rgba(255, 250, 240, 0.35);
+    border-radius: 6px;
+    padding: var(--espaco-md);
+}
+
+.coluna-status h3 {
+    font-family: var(--fonte-rotulo);
+    font-size: 1.15rem;
+    color: #fffaf0;
+    margin: 0 0 var(--espaco-md) 0;
+    padding-bottom: var(--espaco-sm);
+    border-bottom: 2px dotted rgba(255, 250, 240, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.coluna-status h3::before {
+    content: "";
+    display: inline-block;
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+#status-afazer { color: var(--status-fazer); }
+#status-andamento { color: var(--status-andamento); }
+#status-revisao { color: var(--status-revisao); }
+#status-concluida { color: var(--status-concluido); }
+
+.lista-tarefas {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espaco-md);
+    padding: 0;
+    list-style: none;
+    margin: 0;
+}
+
+.lista-tarefas li {
+    display: flex;
+}
+
+/* --- Cada tarefa: uma ficha presa por um pino --- */
+.cartao-tarefa {
+    --rotacao: -1.2deg;
+    --cor-pino: var(--status-fazer);
+    background: var(--papel);
+    background-image: linear-gradient(rgba(70, 45, 15, 0.06) 1px, transparent 1px);
+    background-size: 100% 1.6rem;
+    color: var(--tinta);
+    padding: calc(var(--espaco-md) + 0.4rem) var(--espaco-md) var(--espaco-md);
+    border: 1px solid #e2d3ad;
+    border-radius: var(--raio-borda);
+    min-width: 0;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 8px 16px var(--papel-sombra), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    transform: rotate(var(--rotacao));
+    animation: ficha-fixada 0.4s ease-out backwards;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lista-tarefas li:nth-child(3n+1) .cartao-tarefa { --rotacao: -1.4deg; }
+.lista-tarefas li:nth-child(3n+2) .cartao-tarefa { --rotacao: 0.8deg; }
+.lista-tarefas li:nth-child(3n+3) .cartao-tarefa { --rotacao: -0.3deg; }
+.lista-tarefas li:nth-child(2) .cartao-tarefa { animation-delay: 0.05s; }
+.lista-tarefas li:nth-child(3) .cartao-tarefa { animation-delay: 0.1s; }
+.lista-tarefas li:nth-child(4) .cartao-tarefa { animation-delay: 0.15s; }
+
+.cartao-tarefa:hover,
+.cartao-tarefa:focus-within {
+    transform: rotate(0deg) translateY(-3px);
+    box-shadow: 0 14px 22px var(--papel-sombra), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+}
+
+/* o pino, preso no topo da ficha */
+.cartao-tarefa::before {
+    content: "";
+    position: absolute;
+    top: -0.55rem;
+    left: 50%;
+    translate: -50% 0;
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.8), transparent 40%), var(--cor-pino);
+    animation: pino-pulso 3s ease-in-out infinite;
+}
+
+.status-fazer { --cor-pino: var(--status-fazer); border-top: 3px solid var(--status-fazer); }
+.status-andamento { --cor-pino: var(--status-andamento); border-top: 3px solid var(--status-andamento); }
+.status-revisao { --cor-pino: var(--status-revisao); border-top: 3px solid var(--status-revisao); }
+.status-concluido { --cor-pino: var(--status-concluido); border-top: 3px solid var(--status-concluido); }
+
+.titulo-cartao {
+    font-family: var(--fonte-rotulo);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--tinta);
+    margin: 0 0 var(--espaco-sm) 0;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.texto-padrao {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 var(--espaco-sm) 0;
+}
+
+.texto-padrao strong {
+    color: var(--tinta-suave);
+    font-weight: 600;
+}
+
+.texto-pequeno {
+    font-size: 0.8rem;
+    color: var(--tinta-suave);
+    margin: 0;
+}
+
+.cartao-tarefa button {
+    font-family: var(--fonte-corpo);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-top: var(--espaco-sm);
+    background: transparent;
+    color: var(--tinta);
+    border: 1.5px solid var(--tinta-suave);
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.cartao-tarefa button:hover {
+    background: var(--tinta);
+    color: var(--papel);
+}
+
+.cartao-tarefa button:active {
+    transform: scale(0.96);
+}
+
+footer {
+    text-align: center;
+    margin-top: var(--espaco-lg);
+    color: #fffaf0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+@media (min-width: 800px) {
+    .quadro-projetos {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    #quadro-titulo {
+        grid-column: 1 / -1;
+        margin-top: 0;
+    }
+
+    .coluna-status {
+        position: relative;
+    }
+
+    .coluna-status:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 1rem;
+        right: calc(-1 * var(--espaco-lg) / 2 - 1px);
+        bottom: 1rem;
+        border-right: 2px dashed rgba(255, 250, 240, 0.4);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cartao-tarefa {
+        animation: none;
+    }
+    .cartao-tarefa::before {
+        animation: none;
+    }
+    .cartao-tarefa,
+    .cartao-tarefa button,
+    main > section[aria-labelledby="filtros-titulo"] button[type="submit"] {
+        transition: none;
+    }
+}

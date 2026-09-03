@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Tarefas Acadêmicas - Anthonny Cristhyan</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -56,70 +56,29 @@
             </form>
         </section>
 
-        <section aria-labelledby="quadro-titulo" class="quadro-projetos">
+        <p data-estado role="status" aria-live="polite" class="texto-padrao"></p>
+
+        <section aria-labelledby="quadro-titulo" class="quadro-projetos" data-quadro>
             <h2 id="quadro-titulo">Quadro de Projetos</h2>
 
             <section aria-labelledby="status-afazer" class="coluna-status">
                 <h3 id="status-afazer">A fazer</h3>
-                <ul class="lista-tarefas">
-                    <li>
-                        <article class="cartao-tarefa status-fazer">
-                            <h4 class="titulo-cartao">Modelar Banco de Dados Relacional (SQL) com uma documentação gigantesca que não cabe na tela</h4>
-                            <p class="texto-padrao"><strong>Projeto:</strong> Sistema de Tickets</p>
-                            <p class="texto-padrao"><strong>Responsável:</strong> Anthonny Cristhyan</p>
-                            <p class="texto-pequeno"><strong>Prazo:</strong> 25/08/2026</p>
-                            <p class="texto-pequeno"><strong>Prioridade:</strong> Alta</p>
-                        </article>
-                    </li>
-                    <li>
-                        <article class="cartao-tarefa status-fazer">
-                            <h4 class="titulo-cartao">Gravar vídeo de apresentação para cliente</h4>
-                            <p class="texto-padrao"><strong>Projeto:</strong> Agência ACK (IA em Anúncios)</p>
-                            <p class="texto-padrao"><strong>Responsável:</strong> Kívia</p>
-                            <p class="texto-pequeno"><strong>Prazo:</strong> 30/08/2026</p>
-                            <p class="texto-pequeno"><strong>Prioridade:</strong> Média</p>
-                        </article>
-                    </li>
-                </ul>
+                <ul class="lista-tarefas" data-lista-status="a-fazer"></ul>
             </section>
 
             <section aria-labelledby="status-andamento" class="coluna-status">
                 <h3 id="status-andamento">Em andamento</h3>
-                <ul class="lista-tarefas">
-                    <li>
-                        <article class="cartao-tarefa status-andamento">
-                            <h4 class="titulo-cartao">Estruturar rotas do Backend (CRUD)</h4>
-                            <p class="texto-padrao"><strong>Projeto:</strong> Sistema de Tickets</p>
-                            <p class="texto-padrao"><strong>Responsável:</strong> Anthonny Cristhyan</p>
-                            <p class="texto-pequeno"><strong>Prazo:</strong> 22/08/2026</p>
-                            <p class="texto-pequeno"><strong>Prioridade:</strong> Alta</p>
-                        </article>
-                    </li>
-                    <li>
-                        <article class="cartao-tarefa status-andamento">
-                            <h4 class="titulo-cartao">Escrever roteiro do plano de negócios</h4>
-                            <p class="texto-padrao"><strong>Projeto:</strong> Agência ACK (IA em Anúncios)</p>
-                            <p class="texto-padrao"><strong>Responsável:</strong> Kívia</p>
-                            <p class="texto-pequeno"><strong>Prazo:</strong> 28/08/2026</p>
-                            <p class="texto-pequeno"><strong>Prioridade:</strong> Baixa</p>
-                        </article>
-                    </li>
-                </ul>
+                <ul class="lista-tarefas" data-lista-status="em-andamento"></ul>
+            </section>
+
+            <section aria-labelledby="status-revisao" class="coluna-status">
+                <h3 id="status-revisao">Em revisão</h3>
+                <ul class="lista-tarefas" data-lista-status="em-revisao"></ul>
             </section>
 
             <section aria-labelledby="status-concluida" class="coluna-status">
                 <h3 id="status-concluida">Concluída</h3>
-                <ul class="lista-tarefas">
-                    <li>
-                        <article class="cartao-tarefa status-concluido">
-                            <h4 class="titulo-cartao">Criar calculadora de 4 bits no Logisim</h4>
-                            <p class="texto-padrao"><strong>Projeto:</strong> Arquitetura de Computadores</p>
-                            <p class="texto-padrao"><strong>Responsável:</strong> Anthonny Cristhyan</p>
-                            <p class="texto-pequeno"><strong>Prazo:</strong> 15/08/2026</p>
-                            <p class="texto-pequeno"><strong>Prioridade:</strong> Alta</p>
-                        </article>
-                    </li>
-                </ul>
+                <ul class="lista-tarefas" data-lista-status="concluida"></ul>
             </section>
         </section>
     </main>
@@ -128,5 +87,6 @@
         <p>Desenvolvido por <strong>Anthonny Cristhyan</strong> - Desenvolvimento Front-end</p>
     </footer>
 
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>
