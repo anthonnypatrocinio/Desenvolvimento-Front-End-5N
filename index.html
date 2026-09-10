@@ -17,7 +17,7 @@
     <main>
         <section aria-labelledby="filtros-titulo">
             <h2 id="filtros-titulo">Busca e Filtros</h2>
-            <form action="#" method="GET">      
+            <form>
                 <p>
                     <label for="busca-titulo">Buscar por título da tarefa:</label>
                     <input type="text" id="busca-titulo" name="busca">
@@ -36,22 +36,32 @@
 
                 <fieldset>
                     <legend>Filtrar por Prioridade</legend>
-                    
+
                     <input type="radio" id="prioridade-todas" name="prioridade" value="todas" checked>
                     <label for="prioridade-todas">Todas</label>
-                    
+
                     <input type="radio" id="prioridade-baixa" name="prioridade" value="baixa">
                     <label for="prioridade-baixa">Baixa</label>
-                    
+
                     <input type="radio" id="prioridade-media" name="prioridade" value="media">
                     <label for="prioridade-media">Média</label>
-                    
+
                     <input type="radio" id="prioridade-alta" name="prioridade" value="alta">
                     <label for="prioridade-alta">Alta</label>
                 </fieldset>
 
                 <p>
-                    <button type="submit">Aplicar Filtros</button>
+                    <label for="ordenacao">Ordenar por:</label>
+                    <select id="ordenacao" name="ordenacao">
+                        <option value="prazo-asc">Prazo (mais próximo primeiro)</option>
+                        <option value="prazo-desc">Prazo (mais distante primeiro)</option>
+                        <option value="prioridade-desc">Prioridade (alta primeiro)</option>
+                        <option value="titulo-asc">Título (A-Z)</option>
+                    </select>
+                </p>
+
+                <p>
+                    <button type="button" class="botao-acao" data-acao-limpar>Limpar filtros</button>
                 </p>
             </form>
         </section>
