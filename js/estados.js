@@ -1,9 +1,12 @@
 // estados.js
-// Responsabilidade: decidir qual das quatro telas está valendo — carregando, sucesso,
-// vazio ou erro — e atualizar a região de status. Nenhuma requisição acontece aqui;
-// quem chama já trouxe o resultado (dados ou o erro capturado).
+// Responsabilidade: ser o ÚNICO ponto de sincronização entre estado e tela.
+// renderizarAplicacao(estado) é chamada depois de toda mudança (evento novo
+// ou resposta de rede) e decide, a partir do MESMO estado, o que o quadro e
+// a região de status devem mostrar. Nenhuma requisição acontece aqui; quem
+// chama já atualizou estado.tarefas / estado.carregamento / estado.erro.
 
 import { renderizarTarefas } from "./renderizacao.js";
+import { selecionarTarefas } from "./selecao.js";
 
 function pluralizar(quantidade, singular, plural) {
     return quantidade === 1 ? singular : plural;
@@ -28,39 +31,45 @@ function mensagemDeErro(erro) {
     return "Não foi possível carregar as tarefas.";
 }
 
-// dados tem significado diferente conforme o estado:
-// - "sucesso"/"vazio": o array de tarefas
-// - "erro": o objeto de erro capturado no catch
-// - "carregando": não é usado
-export function renderizarEstado(estado, dados) {
+// Slide 21: origem vazia (nada foi carregado) e resultado vazio (os critérios
+// não bateram com nada) respondem perguntas diferentes e merecem mensagens
+// diferentes — nenhuma das duas é um erro.
+function mensagemDeResumo(totalVisivel, totalOrigem) {
+    if (totalOrigem === 0) {
+        return "Nenhuma tarefa foi cadastrada.";
+    }
+
+    if (totalVisivel === 0) {
+        return "Nenhum resultado para os critérios atuais. Altere ou limpe os filtros.";
+    }
+
+    return `${totalVisivel} de ${totalOrigem} ${pluralizar(totalOrigem, "tarefa", "tarefas")}.`;
+}
+
+// Ponto único chamado por app.js: no carregamento inicial, a cada resposta de
+// rede e a cada evento de busca/filtro/ordenação/limpeza. Sempre lê o estado
+// inteiro e sempre re-deriva a lista visível — nunca reaproveita um resultado
+// antigo, então a ordem das interações não muda o resultado final.
+export function renderizarAplicacao(estado) {
     const elementoEstado = document.querySelector("[data-estado]");
     const quadro = document.querySelector("[data-quadro]");
 
-    switch (estado) {
-        case "carregando":
-            if (elementoEstado) elementoEstado.textContent = "Carregando tarefas...";
-            break;
+    if (estado.carregamento === "carregando") {
+        if (elementoEstado) elementoEstado.textContent = "Carregando tarefas...";
+        return;
+    }
 
-        case "sucesso": {
-            const tarefas = dados ?? [];
-            if (quadro) renderizarTarefas(tarefas, quadro);
-            if (elementoEstado) {
-                elementoEstado.textContent =
-                    `${tarefas.length} ${pluralizar(tarefas.length, "tarefa carregada", "tarefas carregadas")}.`;
-            }
-            break;
-        }
+    if (estado.carregamento === "erro") {
+        if (quadro) renderizarTarefas([], quadro);
+        if (elementoEstado) elementoEstado.textContent = mensagemDeErro(estado.erro);
+        return;
+    }
 
-        case "vazio":
-            if (quadro) renderizarTarefas([], quadro);
-            if (elementoEstado) elementoEstado.textContent = "Nenhuma tarefa encontrada.";
-            break;
-
-        case "erro":
-            if (elementoEstado) elementoEstado.textContent = mensagemDeErro(dados);
-            break;
-
-        default:
-            break;
+    // "sucesso": deriva a visão a partir do MESMO estado.tarefas (nunca uma
+    // cópia guardada à parte) e sincroniza quadro + resumo com a mesma lista.
+    const visiveis = selecionarTarefas(estado);
+    if (quadro) renderizarTarefas(visiveis, quadro);
+    if (elementoEstado) {
+        elementoEstado.textContent = mensagemDeResumo(visiveis.length, estado.tarefas.length);
     }
 }
