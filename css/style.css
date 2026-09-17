@@ -699,6 +699,93 @@ header, main, footer {
     }
 }
 
+/* --- A ficha de busca e filtros também é escrita, e não só exibida -------
+   Aqui a revelação usa clip-path em vez de max-width (o truque do título dos
+   cartões): rótulos são elementos em linha, com fundo, borda e foco próprios,
+   e clip-path revela tudo isso da esquerda para a direita sem mexer no
+   layout — nenhum controle muda de lugar enquanto a animação roda.
+   Os atrasos seguem a ordem de leitura da ficha, de cima para baixo. */
+
+@keyframes escrever-linha {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+#filtros-titulo,
+main > section[aria-labelledby="filtros-titulo"] label,
+main > section[aria-labelledby="filtros-titulo"] legend,
+main > section[aria-labelledby="filtros-titulo"] .botao-acao {
+    animation: escrever-linha 0.5s steps(18, end) var(--atraso-escrita, 0s) backwards;
+}
+
+#filtros-titulo { --atraso-escrita: 0.05s; }
+main > section[aria-labelledby="filtros-titulo"] form > p:nth-of-type(1) label { --atraso-escrita: 0.3s; }
+main > section[aria-labelledby="filtros-titulo"] form > p:nth-of-type(2) label { --atraso-escrita: 0.55s; }
+main > section[aria-labelledby="filtros-titulo"] legend { --atraso-escrita: 0.8s; }
+main > section[aria-labelledby="filtros-titulo"] fieldset label:nth-of-type(1) { --atraso-escrita: 1s; }
+main > section[aria-labelledby="filtros-titulo"] fieldset label:nth-of-type(2) { --atraso-escrita: 1.1s; }
+main > section[aria-labelledby="filtros-titulo"] fieldset label:nth-of-type(3) { --atraso-escrita: 1.2s; }
+main > section[aria-labelledby="filtros-titulo"] fieldset label:nth-of-type(4) { --atraso-escrita: 1.3s; }
+main > section[aria-labelledby="filtros-titulo"] form > p:nth-of-type(3) label { --atraso-escrita: 1.5s; }
+main > section[aria-labelledby="filtros-titulo"] .botao-acao { --atraso-escrita: 1.7s; }
+
+/* --- Rascunho a lápis na ficha de papel (lapis.js) -----------------------
+   O canvas cobre a ficha inteira, mas fica ATRÁS do conteúdo e surdo ao
+   ponteiro: quem escuta o arrasto é a própria ficha. Resultado: arrastar
+   sobre um campo continua usando o campo, arrastar sobre o papel rabisca. */
+.papel-rascunho {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 2px;
+}
+
+main > section[aria-labelledby="filtros-titulo"] > *:not(.papel-rascunho):not(.botao-borracha) {
+    position: relative;
+    z-index: 1;
+}
+
+main > section[aria-labelledby="filtros-titulo"] {
+    /* Sinaliza que a área livre do papel aceita o lápis. */
+    cursor: crosshair;
+}
+
+main > section[aria-labelledby="filtros-titulo"] input[type="text"] { cursor: text; }
+main > section[aria-labelledby="filtros-titulo"] select,
+main > section[aria-labelledby="filtros-titulo"] button,
+main > section[aria-labelledby="filtros-titulo"] label,
+main > section[aria-labelledby="filtros-titulo"] input[type="radio"] { cursor: pointer; }
+main > section[aria-labelledby="filtros-titulo"] legend { cursor: default; }
+
+/* Enquanto o traço está sendo feito, arrastar não seleciona o texto da ficha. */
+.papel--rabiscando,
+.papel--rabiscando * {
+    user-select: none;
+}
+
+.botao-borracha {
+    position: absolute;
+    z-index: 2;
+    top: 0.6rem;
+    right: 0.8rem;
+    font-family: var(--fonte-corpo);
+    font-size: 0.72rem;
+    color: var(--tinta-suave);
+    background: transparent;
+    border: 1px dashed #c9b183;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    opacity: 0.55;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.botao-borracha:hover,
+.botao-borracha:focus-visible {
+    opacity: 1;
+    background: rgba(201, 177, 131, 0.25);
+}
+
 /* --- Abertura do quadro: as fichas sendo organizadas (abertura.js) -------
    Três tempos encadeados na MESMA ficha, cada um com seu atraso:
      organizar-ficha  → o papel chega voando e se assenta torto
@@ -794,6 +881,15 @@ header, main, footer {
     .cartao-tarefa--entrando .titulo-cartao,
     .cartao-tarefa--entrando p,
     .cartao-tarefa--entrando button {
+        animation: none;
+    }
+
+    /* A escrita dos rótulos também é decorativa: sem movimento, eles
+       simplesmente já estão lá. */
+    #filtros-titulo,
+    main > section[aria-labelledby="filtros-titulo"] label,
+    main > section[aria-labelledby="filtros-titulo"] legend,
+    main > section[aria-labelledby="filtros-titulo"] .botao-acao {
         animation: none;
     }
 }

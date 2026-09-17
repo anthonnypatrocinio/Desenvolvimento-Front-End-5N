@@ -11,6 +11,7 @@ import { instalarInteracoes } from "./interacao.js";
 import { instalarAmbiente } from "./ambiente.js";
 import { instalarTutorial } from "./tutorial.js";
 import { animarOrganizacaoInicial } from "./abertura.js";
+import { instalarLapis } from "./lapis.js";
 
 // Slide 8: um objeto responde qual é a situação atual. Cada fato mutável que
 // pode mudar a tela mora aqui — e só aqui. tarefasVisiveis NÃO existe como
@@ -116,6 +117,7 @@ async function iniciar() {
     // nada o comportamento avaliado nas E1-E4.
     instalarInteracoes(quadro, () => estado.tarefas);
     instalarAmbiente();
+    instalarLapis();
 
     // Estado "carregando" é aplicado ANTES do await — é isso que faz a
     // mensagem aparecer de fato enquanto a rede responde.

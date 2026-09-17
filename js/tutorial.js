@@ -42,6 +42,11 @@ const PASSOS = [
         texto: "Um clique aqui restaura busca, status, prioridade e ordenação ao ponto de partida.",
     },
     {
+        seletor: 'main > section[aria-labelledby="filtros-titulo"]',
+        titulo: "Rabisque no papel",
+        texto: "Clique e arraste em qualquer área livre da ficha para desenhar a lápis. Ctrl+Z apaga o último traço; o botão no canto limpa a folha.",
+    },
+    {
         seletor: ".cartao-tarefa",
         titulo: "Clique numa tarefa",
         texto: "Toda ficha pode ser clicada: ela se solta do mural e vem para perto de você, ampliada e sem cortes no título.",
