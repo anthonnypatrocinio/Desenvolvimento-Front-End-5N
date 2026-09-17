@@ -1,6 +1,8 @@
 // api.js
 // Responsabilidade única: buscar os dados brutos pela rede.
-// Nenhuma linha aqui toca no DOM — quem decide o que aparecer na tela é estados.js.
+// Nenhuma linha aqui toca no DOM ou decide o que aparece na tela.
+// Este arquivo não muda entre a E3 e a E4 — nada aqui depende de estado,
+// filtros ou ordenação.
 
 export async function carregarTarefas() {
     // fetch só rejeita (TypeError) quando a requisição em si falha: rede fora, URL inválida.

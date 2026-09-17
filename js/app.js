@@ -7,6 +7,10 @@
 import { instalarEventosDoQuadro } from "./renderizacao.js";
 import { carregarTarefas } from "./api.js";
 import { renderizarAplicacao } from "./estados.js";
+import { instalarInteracoes } from "./interacao.js";
+import { instalarAmbiente } from "./ambiente.js";
+import { instalarTutorial } from "./tutorial.js";
+import { animarOrganizacaoInicial } from "./abertura.js";
 
 // Slide 8: um objeto responde qual é a situação atual. Cada fato mutável que
 // pode mudar a tela mora aqui — e só aqui. tarefasVisiveis NÃO existe como
@@ -107,6 +111,12 @@ async function iniciar() {
     instalarEventosDoQuadro(quadro, () => estado.tarefas);
     conectarControles(estado, atualizarTela);
 
+    // Camadas puramente visuais/interativas (E5) — não leem nem escrevem em
+    // estado.tarefas/busca/status/prioridade/ordenacao, então não alteram em
+    // nada o comportamento avaliado nas E1-E4.
+    instalarInteracoes(quadro, () => estado.tarefas);
+    instalarAmbiente();
+
     // Estado "carregando" é aplicado ANTES do await — é isso que faz a
     // mensagem aparecer de fato enquanto a rede responde.
     atualizarTela();
@@ -120,6 +130,13 @@ async function iniciar() {
     }
 
     atualizarTela();
+
+    // A abertura (E5) só faz sentido depois que existem fichas na tela, e só
+    // na primeira vez: daqui em diante, quem redesenha o quadro é o ciclo
+    // normal de filtros/ordenação. Ela devolve quanto tempo a coreografia
+    // leva, e o tutorial usa esse número para não abrir por cima dela.
+    const duracaoDaAbertura = animarOrganizacaoInicial(quadro) ?? 0;
+    instalarTutorial({ atrasoDaPrimeiraVisita: duracaoDaAbertura + 400 });
 }
 
 // Sem await de nível superior: a inicialização roda dentro da função async acima.

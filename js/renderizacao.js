@@ -1,8 +1,10 @@
 // renderizacao.js
 // Responsabilidade: transformar tarefas em nós DOM e reagir a cliques.
-// Não busca dados, não decide de onde eles vêm, e não sabe nada sobre
-// "carregando/sucesso/erro/vazio" (isso é papel de api.js e estados.js).
-// Este arquivo não muda entre a entrega da aula 5 e a E3.
+// Não busca dados, não sabe de onde eles vêm, não sabe filtrar nem ordenar,
+// e não sabe nada sobre "carregando/sucesso/erro/vazio" (isso é papel de
+// estados.js) nem sobre busca/filtros/ordenação (isso é papel de selecao.js).
+// Por isso este arquivo não muda entre a E3 e a E4: ele só recebe uma lista
+// já pronta (tarefasVisiveis) e a desenha.
 
 const CLASSE_POR_STATUS = {
     "a-fazer": "status-fazer",
@@ -61,14 +63,15 @@ export function criarCartao(tarefa) {
     return cartao;
 }
 
-// Sincroniza cada coluna [data-lista-status] com as tarefas daquele status.
-// Chamar duas vezes seguidas não duplica cartões (replaceChildren substitui a fotografia anterior).
-export function renderizarTarefas(tarefas, quadro) {
+// Sincroniza cada coluna [data-lista-status] com as tarefas VISÍVEIS daquele
+// status (já filtradas/ordenadas por quem chamou). Chamar duas vezes seguidas
+// não duplica cartões (replaceChildren substitui a fotografia anterior).
+export function renderizarTarefas(tarefasVisiveis, quadro) {
     const colunas = quadro.querySelectorAll("[data-lista-status]");
 
     colunas.forEach((lista) => {
         const status = lista.dataset.listaStatus;
-        const tarefasDoStatus = tarefas.filter((tarefa) => tarefa.status === status);
+        const tarefasDoStatus = tarefasVisiveis.filter((tarefa) => tarefa.status === status);
 
         if (tarefasDoStatus.length === 0) {
             const mensagemVazia = document.createElement("li");
@@ -89,8 +92,9 @@ export function renderizarTarefas(tarefas, quadro) {
 }
 
 // Um único listener no quadro (ancestral estável) atende cartões antigos e novos,
-// mesmo depois de renderizarTarefas substituir os nós.
-// obterTarefas é uma função (não um array) para sempre enxergar os dados mais recentes.
+// mesmo depois que renderizarTarefas substitui os nós a cada nova busca/filtro.
+// obterTarefas é uma função (não um array) para sempre enxergar os dados mais
+// recentes — em app.js ela aponta para estado.tarefas.
 export function instalarEventosDoQuadro(quadro, obterTarefas) {
     quadro.addEventListener("click", (evento) => {
         if (!(evento.target instanceof Element)) return;

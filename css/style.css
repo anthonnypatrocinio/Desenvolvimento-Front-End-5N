@@ -73,6 +73,11 @@
     50% { box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), 0 0 0 4px rgba(255, 255, 255, 0.15); }
 }
 
+@keyframes respirar-ficha {
+    0%, 100% { box-shadow: 0 8px 16px var(--papel-sombra), 0 1px 0 rgba(255, 255, 255, 0.6) inset; }
+    50% { box-shadow: 0 12px 22px var(--papel-sombra), 0 1px 0 rgba(255, 255, 255, 0.6) inset; }
+}
+
 body {
     background-color: var(--cortica);
     background-image:
@@ -172,7 +177,7 @@ legend {
     padding: 0 0.4rem;
 }
 
-main > section[aria-labelledby="filtros-titulo"] button[type="submit"] {
+main > section[aria-labelledby="filtros-titulo"] .botao-acao {
     font-family: var(--fonte-rotulo);
     font-size: 1rem;
     background: var(--status-andamento);
@@ -185,11 +190,11 @@ main > section[aria-labelledby="filtros-titulo"] button[type="submit"] {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-main > section[aria-labelledby="filtros-titulo"] button[type="submit"]:hover {
+main > section[aria-labelledby="filtros-titulo"] .botao-acao:hover {
     transform: translateY(-1px);
 }
 
-main > section[aria-labelledby="filtros-titulo"] button[type="submit"]:active {
+main > section[aria-labelledby="filtros-titulo"] .botao-acao:active {
     transform: translateY(2px);
     box-shadow: 0 1px 0 #a97318;
 }
@@ -287,16 +292,20 @@ main > section[aria-labelledby="filtros-titulo"] button[type="submit"]:active {
     position: relative;
     box-shadow: 0 8px 16px var(--papel-sombra), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
     transform: rotate(var(--rotacao));
-    animation: ficha-fixada 0.4s ease-out backwards;
+    animation: ficha-fixada 0.4s ease-out backwards, respirar-ficha 6s ease-in-out infinite;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: zoom-in;
 }
 
 .lista-tarefas li:nth-child(3n+1) .cartao-tarefa { --rotacao: -1.4deg; }
 .lista-tarefas li:nth-child(3n+2) .cartao-tarefa { --rotacao: 0.8deg; }
 .lista-tarefas li:nth-child(3n+3) .cartao-tarefa { --rotacao: -0.3deg; }
-.lista-tarefas li:nth-child(2) .cartao-tarefa { animation-delay: 0.05s; }
-.lista-tarefas li:nth-child(3) .cartao-tarefa { animation-delay: 0.1s; }
-.lista-tarefas li:nth-child(4) .cartao-tarefa { animation-delay: 0.15s; }
+/* Escalonamento da animação padrão (re-render por filtro/ordenação). O
+   :not() é necessário porque esta regra é mais específica que a da abertura:
+   sem ele, ela sobrescreveria o atraso em cascata das fichas na entrada. */
+.lista-tarefas li:nth-child(2) .cartao-tarefa:not(.cartao-tarefa--entrando) { animation-delay: 0.05s; }
+.lista-tarefas li:nth-child(3) .cartao-tarefa:not(.cartao-tarefa--entrando) { animation-delay: 0.1s; }
+.lista-tarefas li:nth-child(4) .cartao-tarefa:not(.cartao-tarefa--entrando) { animation-delay: 0.15s; }
 
 .cartao-tarefa:hover,
 .cartao-tarefa:focus-within {
@@ -416,7 +425,375 @@ footer {
     }
     .cartao-tarefa,
     .cartao-tarefa button,
-    main > section[aria-labelledby="filtros-titulo"] button[type="submit"] {
+    main > section[aria-labelledby="filtros-titulo"] .botao-acao {
         transition: none;
+    }
+}
+
+/* ==========================================================================
+   E5 — vida, movimento e guia de uso (camada puramente visual)
+   -------------------------------------------------------------------------
+   Nada abaixo renomeia ou remove uma classe/id/atributo que o JS das E1-E4
+   já usa; só adiciona seletores, classes e keyframes novos — a maioria
+   criada e removida dinamicamente pelos módulos interacao.js, ambiente.js
+   e tutorial.js. Tudo aqui respeita prefers-reduced-motion (ver o bloco no
+   final desta seção).
+   ========================================================================== */
+
+/* --- Poeira suspensa sobre o mural: 100% CSS, nenhum HTML novo --- */
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image:
+        radial-gradient(circle, rgba(255, 250, 240, 0.55) 1px, transparent 1.6px),
+        radial-gradient(circle, rgba(255, 250, 240, 0.4) 1px, transparent 1.6px),
+        radial-gradient(circle, rgba(255, 250, 240, 0.3) 1px, transparent 1.6px);
+    background-size: 180px 180px, 260px 260px, 140px 140px;
+    background-position: 10% 20%, 70% 60%, 40% 85%;
+    animation: flutuar-poeira 40s linear infinite;
+    opacity: 0.55;
+}
+
+@keyframes flutuar-poeira {
+    from { background-position: 10% 20%, 70% 60%, 40% 85%; }
+    to   { background-position: 10% -80%, 70% -60%, 40% -75%; }
+}
+
+/* --- Holofote que acompanha o cursor (criado por ambiente.js) --- */
+.mural-holofote {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+        240px circle at var(--mouse-x, 50%) var(--mouse-y, 20%),
+        rgba(255, 250, 240, 0.18),
+        transparent 70%
+    );
+}
+
+/* Conteúdo real acima da poeira/holofote, que ficam no fundo (z-index baixo) */
+header, main, footer {
+    position: relative;
+    z-index: 2;
+}
+
+/* --- Lampejo na região de status a cada mudança de texto --- */
+[data-estado].atualizado {
+    animation: piscar-estado 0.7s ease;
+}
+
+@keyframes piscar-estado {
+    0% { background: rgba(226, 161, 58, 0.9); }
+    100% { background: rgba(58, 42, 24, 0.75); }
+}
+
+/* --- Efeito de tinta ao clicar (criado por interacao.js) --- */
+.botao-acao,
+.cartao-tarefa button {
+    position: relative;
+    overflow: hidden;
+}
+
+.efeito-tinta {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(58, 42, 24, 0.35), rgba(58, 42, 24, 0) 70%);
+    transform: scale(0);
+    animation: espalhar-tinta 0.65s ease-out forwards;
+    z-index: 5;
+}
+
+@keyframes espalhar-tinta {
+    to { transform: scale(1); opacity: 0; }
+}
+
+/* --- Zoom/foco de uma tarefa (criado por interacao.js) --- */
+.zoom-fundo {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 14, 6, 0.55);
+    backdrop-filter: blur(3px);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 40;
+}
+
+.zoom-fundo--ativo {
+    opacity: 1;
+}
+
+.cartao-zoom {
+    position: fixed;
+    z-index: 41;
+    margin: 0;
+    cursor: default;
+    --rotacao: 0deg;
+    animation: none;
+    overflow-y: auto;
+    transition:
+        top 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+        left 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+        width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+        height 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+        box-shadow 0.3s ease;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+}
+
+.cartao-zoom .titulo-cartao {
+    white-space: normal;
+    padding-right: 1.6rem;
+}
+
+/* O botão de fechar é filho de um .cartao-tarefa (o clone ampliado), então
+   ele herdava padding e margin-top da regra ".cartao-tarefa button" — é isso
+   que jogava o "x" para fora do centro do círculo. Um seletor com dois níveis
+   (.cartao-zoom .zoom-fechar) vence essa regra e zera os dois, e o glifo é
+   centralizado por flexbox em vez de depender do line-height. */
+.cartao-zoom .zoom-fechar {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--tinta);
+    color: var(--papel);
+    font-family: var(--fonte-corpo);
+    font-size: 1.15rem;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.cartao-zoom .zoom-fechar:hover {
+    background: var(--status-fazer);
+    color: #fff8ec;
+    transform: scale(1.08);
+}
+
+.cartao-tarefa--desfocado {
+    opacity: 0.35;
+    filter: saturate(0.7);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* --- Tutorial guiado (criado por tutorial.js) --- */
+/* Enquanto o tour está aberto, a raiz do documento para de rolar. Assim o
+   recorte (posicionado em coordenadas de viewport) nunca sai de cima do
+   controle que ele destaca. A classe é colocada e removida por tutorial.js. */
+.rolagem-travada,
+.rolagem-travada body {
+    overflow: hidden;
+}
+
+.tutorial-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    /* Barra qualquer tentativa de rolar por toque ou por roda do mouse
+       sobre a camada escura, e impede que o gesto "vaze" para a página. */
+    touch-action: none;
+    overscroll-behavior: contain;
+}
+
+.tutorial-recorte {
+    position: absolute;
+    border-radius: 8px;
+    box-shadow: 0 0 0 9999px rgba(20, 14, 6, 0.72);
+    transition: top 0.4s ease, left 0.4s ease, width 0.4s ease, height 0.4s ease;
+    pointer-events: none;
+}
+
+.tutorial-nota {
+    position: absolute;
+    max-width: 260px;
+    background: var(--papel);
+    color: var(--tinta);
+    padding: var(--espaco-md);
+    border-radius: 2px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    transition: top 0.4s ease, left 0.4s ease;
+}
+
+.tutorial-nota::before {
+    content: "📌";
+    position: absolute;
+    top: -0.9rem;
+    left: 1rem;
+    font-size: 1.3rem;
+    transform: rotate(-8deg);
+}
+
+.tutorial-nota h4 {
+    font-family: var(--fonte-rotulo);
+    margin: 0 0 0.4rem 0;
+    font-size: 1.05rem;
+}
+
+.tutorial-acoes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--espaco-sm);
+    gap: 0.5rem;
+}
+
+.tutorial-acoes button {
+    font-family: var(--fonte-corpo);
+    font-size: 0.8rem;
+    border: 1.5px solid var(--tinta-suave);
+    background: transparent;
+    color: var(--tinta);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+}
+
+.tutorial-acoes button.tutorial-proximo {
+    background: var(--status-andamento);
+    border-color: transparent;
+    color: #3a2a10;
+    font-weight: 600;
+}
+
+.tutorial-progresso {
+    font-size: 0.75rem;
+    color: var(--tinta-suave);
+}
+
+.botao-ajuda {
+    position: fixed;
+    right: 1.2rem;
+    bottom: 1.2rem;
+    z-index: 55;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    border: none;
+    background: var(--status-fazer);
+    color: #fff8ec;
+    font-family: var(--fonte-rotulo);
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
+    animation: pino-pulso 3s ease-in-out infinite;
+}
+
+@media (max-width: 480px) {
+    .tutorial-nota {
+        max-width: calc(100vw - 32px);
+    }
+}
+
+/* --- Abertura do quadro: as fichas sendo organizadas (abertura.js) -------
+   Três tempos encadeados na MESMA ficha, cada um com seu atraso:
+     organizar-ficha  → o papel chega voando e se assenta torto
+     escrever-titulo  → o título é escrito da esquerda para a direita
+     espetar-pino     → o pino desce e prende a ficha no mural
+   As variáveis --de-x, --de-y, --giro-entrada e --atraso-entrada são escritas
+   em cada cartão por abertura.js; os valores abaixo são só as reservas. */
+
+@keyframes organizar-ficha {
+    0% {
+        opacity: 0;
+        transform:
+            translate(var(--de-x, 0px), var(--de-y, -60px))
+            rotate(var(--giro-entrada, 8deg))
+            scale(0.82);
+    }
+    60% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(calc(var(--rotacao) * 2.4)) scale(1.03);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0) rotate(var(--rotacao)) scale(1);
+    }
+}
+
+/* O título já é uma linha só com overflow escondido (text-overflow: ellipsis),
+   então revelar a largura da esquerda para a direita imita a caneta escrevendo.
+   steps() dá o andamento de escrita à mão, não de cortina deslizando. */
+@keyframes escrever-titulo {
+    from { max-width: 0; }
+    to { max-width: 100%; }
+}
+
+@keyframes secar-tinta {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes espetar-pino {
+    0% { opacity: 0; transform: translateY(-2.2rem) scale(2); }
+    70% { opacity: 1; transform: translateY(0) scale(0.82); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cartao-tarefa--entrando {
+    /* Substitui a animação padrão da ficha (ficha-fixada) só nesta primeira
+       leva de cartões. "respirar-ficha" entra depois que a ficha se assenta. */
+    animation:
+        organizar-ficha 0.72s cubic-bezier(0.22, 0.9, 0.24, 1.08) var(--atraso-entrada, 0ms) backwards,
+        respirar-ficha 6s ease-in-out calc(var(--atraso-entrada, 0ms) + 1.4s) infinite;
+}
+
+.cartao-tarefa--entrando .titulo-cartao {
+    animation: escrever-titulo 0.65s steps(26, end) calc(var(--atraso-entrada, 0ms) + 0.42s) backwards;
+}
+
+.cartao-tarefa--entrando p,
+.cartao-tarefa--entrando button {
+    animation: secar-tinta 0.4s ease-out calc(var(--atraso-entrada, 0ms) + 0.75s) backwards;
+}
+
+.cartao-tarefa--entrando::before {
+    animation:
+        espetar-pino 0.34s cubic-bezier(0.3, 1.4, 0.5, 1) calc(var(--atraso-entrada, 0ms) + 0.98s) backwards,
+        pino-pulso 3s ease-in-out calc(var(--atraso-entrada, 0ms) + 1.4s) infinite;
+}
+
+/* --- E5 também respeita prefers-reduced-motion --- */
+@media (prefers-reduced-motion: reduce) {
+    body::after,
+    .mural-holofote,
+    .botao-ajuda {
+        display: none;
+    }
+
+    .efeito-tinta {
+        display: none;
+    }
+
+    .cartao-zoom,
+    .zoom-fundo,
+    .tutorial-recorte,
+    .tutorial-nota,
+    .cartao-zoom .zoom-fechar {
+        transition: none;
+    }
+
+    /* abertura.js nem chega a marcar as fichas quando o sistema pede menos
+       movimento; a regra abaixo é a rede de segurança. */
+    .cartao-tarefa--entrando,
+    .cartao-tarefa--entrando::before,
+    .cartao-tarefa--entrando .titulo-cartao,
+    .cartao-tarefa--entrando p,
+    .cartao-tarefa--entrando button {
+        animation: none;
     }
 }
